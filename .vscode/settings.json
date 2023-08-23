@@ -4,7 +4,8 @@
         "sdl.h": "c",
         "display.h": "c",
         "lda_chip8.h": "c",
-        "chip8.h": "c"
+        "chip8.h": "c",
+        "chip8la.h": "c"
     },
     "cmake.sourceDirectory": "/home/anhld/Hobby_Projects/chip8la/src"
 }

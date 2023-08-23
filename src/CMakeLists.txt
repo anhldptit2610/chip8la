@@ -11,3 +11,4 @@ add_executable(chip8la
 
 target_link_libraries(chip8la PRIVATE SDL2)
 target_link_libraries(chip8la PRIVATE SDL2_image)
+target_link_libraries(chip8la PRIVATE m)

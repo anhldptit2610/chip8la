@@ -31,33 +31,29 @@ void sdl_cleanup(sdl_t *sdl)
     SDL_Quit();
 }
 
-void sdl_draw(chip8_t *chip8, sdl_t *sdl, uint16_t vx, uint16_t vy, uint16_t n)
+void chip8_draw(chip8_t *chip8, uint16_t vx, uint16_t vy, uint16_t n)
 {
-    uint16_t x = chip8_get_register_val(chip8, vx) % 64;
-    uint16_t y = chip8_get_register_val(chip8, vy) % 32;
-    uint16_t bit_coded_pos = chip8->i;
-
+    uint16_t x = chip8->v[vx] % SCREEN_WIDTH;
+    uint16_t y = chip8->v[vy] % SCREEN_HEIGHT;
+    uint16_t orig_x = x;
+    chip8->v[F] = 0;
     /* loop through each col, find the row's data */
-    for (int i = y; i < y + n; i++) {
-        if (i >= SCREEN_HEIGHT)
-            break;
-        uint8_t bit_coded = chip8->memory[bit_coded_pos];
+    for (int i = 0; i < n; i++) {
+        uint8_t bit_coded = chip8->memory[chip8->i + i];
+        x = orig_x;
         for (int j = 7; j >= 0; j--) {
-            if (x + 7 - j >= SCREEN_WIDTH)
-                break;
+            bool *pixel = &chip8->pixels[x + y * SCREEN_WIDTH];
             uint8_t bit = (bit_coded >> j) & 0x01;
-            if (bit) {
-                uint8_t flipper = chip8->pixels[x + 7 - j + i * 64] ^ 1;
 
-                if (!flipper && chip8->pixels[x + 7 - j + i * 64])
-                    chip8_set_register_to_val(chip8, F, 1);
-                else
-                    chip8_set_register_to_val(chip8, F, 0);
-                chip8->pixels[x + 7 - j + i * 64] ^= 1;
-            }
+            if (bit & *pixel) 
+                chip8->v[F] = 1;
+            *pixel ^= bit;
+            if (++x >= SCREEN_WIDTH)
+                break;
         }
-        bit_coded_pos++;
-    }    
+        if (++y >= SCREEN_HEIGHT)
+            break;
+    }
 }
 
 void sdl_set_renderer_color(sdl_t *sdl, uint8_t color)
@@ -74,30 +70,34 @@ void sdl_set_renderer_color(sdl_t *sdl, uint8_t color)
     }
 }
 
-void sdl_disp_clear(sdl_t *sdl)
+void chip8_disp_clear(chip8_t *chip8, sdl_t *sdl)
 {
-    SDL_SetRenderDrawColor(sdl->renderer, 0xff, 0xff, 0xff, 0xff);
+    memset(chip8->pixels, 0, SCREEN_HEIGHT * SCREEN_WIDTH);
+    SDL_SetRenderDrawColor(sdl->renderer, 0x00, 0x00, 0x00, 0xff);
     SDL_RenderClear(sdl->renderer);
 }
 
 void sdl_update_screen(chip8_t *chip8, sdl_t *sdl)
 {
-    /* loop through each pixel and draw based on the pixel table. */
-    for (int i = 0; i < SCREEN_HEIGHT; i++) {
-        for (int j = 0; j < SCREEN_WIDTH; j++) {
-            SDL_Rect rect = {
-                .w = 10,
-                .h = 10,
-                .x = j * 10,
-                .y = i * 10,
-            };
-            uint8_t pixel = chip8->pixels[j + i * 64];
-            if (!pixel)
-                sdl_set_renderer_color(sdl, BLACK);
-            else
-                sdl_set_renderer_color(sdl, WHITE);
-            SDL_RenderFillRect(sdl->renderer, &rect);
+    if (chip8->draw_flag) {
+        /* loop through each pixel and draw based on the pixel table. */
+        for (int i = 0; i < SCREEN_HEIGHT; i++) {
+            for (int j = 0; j < SCREEN_WIDTH; j++) {
+                SDL_Rect rect = {
+                    .w = 10,
+                    .h = 10,
+                    .x = j * 10,
+                    .y = i * 10,
+                };
+                uint8_t pixel = chip8->pixels[j + i * 64];
+                if (!pixel)
+                    sdl_set_renderer_color(sdl, BLACK);
+                else
+                    sdl_set_renderer_color(sdl, WHITE);
+                SDL_RenderFillRect(sdl->renderer, &rect);
+            }
         }
+        SDL_RenderPresent(sdl->renderer);
+        chip8->draw_flag = 0;
     }
-    SDL_RenderPresent(sdl->renderer);
 }
