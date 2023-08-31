@@ -7,8 +7,11 @@ Dependencies:
 2. sdl2 library(including sdl2_image)
 
 How to install dependencies(on Ubuntu machine):
+
 sudo apt update && sudo apt install cmake libsdl2-dev libsdl2-image-dev
 
 How to build:
+
 mkdir build
+
 cd build && cmake ../src
