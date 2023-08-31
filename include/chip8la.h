@@ -92,6 +92,8 @@ typedef struct chip8 {
     bool keypad[16];
     uint8_t key;
     bool has_key_pressed;
+
+    int screen_scale_factor;
 } chip8_t;
 
 
@@ -107,7 +109,7 @@ uint8_t chip8_get_register_val(chip8_t *chip8, uint16_t reg_num);
 void chip8_check_timers(chip8_t *chip8);
 
 /* display.c */
-int sdl_init(sdl_t *sdl);
+int sdl_init(sdl_t *sdl, int scale_factor);
 void chip8_disp_clear(chip8_t *chip8, sdl_t *sdl);
 void chip8_draw(chip8_t *chip8, uint16_t vx, uint16_t vy, uint16_t n);
 

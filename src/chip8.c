@@ -283,7 +283,7 @@ void chip8_run_instruction(chip8_t *chip8, sdl_t *sdl)
         chip8_execute_fxnn_instructions(chip8);
         break;
     default:
-        fprintf("chip8la: opcode %04x is invalid.\n", chip8->opcode);
+        fprintf(stderr, "chip8la: opcode %04x is invalid.\n", chip8->opcode);
         break;
     }
 }

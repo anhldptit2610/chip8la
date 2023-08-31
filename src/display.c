@@ -1,6 +1,6 @@
 #include "../include/chip8la.h"
 
-int sdl_init(sdl_t *sdl)
+int sdl_init(sdl_t *sdl, int scale_factor)
 {
     int error = 0;
 
@@ -9,7 +9,7 @@ int sdl_init(sdl_t *sdl)
         error = 1;
     }
     sdl->window = SDL_CreateWindow("lda_chip8", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
-                                    640, 320, SDL_WINDOW_SHOWN);
+                                    SCREEN_WIDTH * scale_factor, SCREEN_HEIGHT * scale_factor, SDL_WINDOW_SHOWN);
     if (!sdl->window) {
         SDL_Log("Unable to initialize SDL: %s", SDL_GetError());
         error = 1;
@@ -42,7 +42,7 @@ void chip8_draw(chip8_t *chip8, uint16_t vx, uint16_t vy, uint16_t n)
         uint8_t bit_coded = chip8->memory[chip8->i + i];
         x = orig_x;
         for (int j = 7; j >= 0; j--) {
-            bool *pixel = &chip8->pixels[x + y * SCREEN_WIDTH];
+            bool *pixel = (bool *)&chip8->pixels[x + y * SCREEN_WIDTH];
             uint8_t bit = (bit_coded >> j) & 0x01;
 
             if (bit & *pixel) 
@@ -84,10 +84,10 @@ void sdl_update_screen(chip8_t *chip8, sdl_t *sdl)
         for (int i = 0; i < SCREEN_HEIGHT; i++) {
             for (int j = 0; j < SCREEN_WIDTH; j++) {
                 SDL_Rect rect = {
-                    .w = 10,
-                    .h = 10,
-                    .x = j * 10,
-                    .y = i * 10,
+                    .w = chip8->screen_scale_factor,
+                    .h = chip8->screen_scale_factor,
+                    .x = j * chip8->screen_scale_factor,
+                    .y = i * chip8->screen_scale_factor,
                 };
                 uint8_t pixel = chip8->pixels[j + i * 64];
                 if (!pixel)

@@ -2,8 +2,18 @@
 #include <stdint.h>
 #include <float.h>
 #include <math.h>
+#include <stdlib.h>
 
 #include "../include/chip8la.h"
+
+void usage(void)
+{
+    fprintf(stderr, "usage: chip8la rom_path [scale_size]\n");
+    fprintf(stderr, "       You could choose whether providing\n");
+    fprintf(stderr, "       the scale_size argument or not. \n");
+    fprintf(stderr, "       Default value is 10.\n");
+    exit(EXIT_SUCCESS);
+}
 
 int main(int argc, char *argv[])
 {
@@ -13,7 +23,13 @@ int main(int argc, char *argv[])
     FILE *fp;
     uint16_t start_frame_time, end_frame_time;
 
-    if (sdl_init(&sdl))
+    if (argc < 2)
+        usage();
+    else if (argc == 2)
+        chip8.screen_scale_factor = 10;     // if user does not provide scale factor
+    else
+        chip8.screen_scale_factor = atoi(argv[2]);
+    if (sdl_init(&sdl, chip8.screen_scale_factor))
         exit(EXIT_FAILURE);
     chip8_init(&chip8);
     fp = fopen(rom, "r");

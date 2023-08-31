@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.27.1)
+cmake_minimum_required(VERSION 3.22.1)
 project(chip8la C)
 
 set(CMAKE_BUILD_TYPE Debug)
